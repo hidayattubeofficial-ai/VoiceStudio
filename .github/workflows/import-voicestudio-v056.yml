@@ -1,0 +1,43 @@
+name: Import VoiceStudio v0.5.6
+
+on:
+  push:
+    branches:
+      - "bootstrap/voicestudio-import"
+
+permissions:
+  contents: write
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout target repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: bootstrap/voicestudio-import
+
+      - name: Clone and verify upstream v0.5.6
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/VoiceStudio
+          git clone --depth 1 --branch v0.5.6 https://github.com/debpalash/VoiceStudio.git /tmp/VoiceStudio
+          cd /tmp/VoiceStudio
+          test "$(git rev-parse HEAD)" = "3915a62cb482bb43117aaebab57d22745bd1cc21"
+
+      - name: Replace target tree with upstream source
+        run: |
+          set -euo pipefail
+          find . -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+          cp -a /tmp/VoiceStudio/. .
+          rm -rf .git
+          git init
+          git remote add origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Import VoiceStudio v0.5.6 source"
+          git push origin HEAD:refs/heads/imported/voicestudio-v0.5.6
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
