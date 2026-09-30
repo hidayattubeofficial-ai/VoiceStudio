@@ -22,7 +22,7 @@
 #   :0.3-rocm       — major.minor floating tag, ROCm build
 #   :sha-xxxx-rocm  — specific commit SHA, ROCm build
 #
-# Images land at: ghcr.io/debpalash/omnivoice-studio AND docker.io/palashdeb/omnivoice-studio
+# Images land at: ghcr.io/hidayattubeofficial-ai/voicestudio AND docker.io/palashdeb/omnivoice-studio
 # (Docker Hub push gated on the DOCKERHUB_USERNAME/DOCKERHUB_TOKEN secrets;
 # if unset the build still pushes to GHCR.)
 #
@@ -57,7 +57,7 @@ env:
   # published image path is a promise to users, not a mirror of the repo name.
   # Renaming it is a deliberate migration (publish to both, document the move,
   # then retire the old), not a side effect of renaming the repo.
-  IMAGE_NAME: debpalash/omnivoice-studio
+  # Publish into this repository owner's GHCR namespace; the imported source must not depend on the upstream owner's package installation.\n  IMAGE_NAME: hidayattubeofficial-ai/voicestudio
   DOCKERHUB_IMAGE: palashdeb/omnivoice-studio
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
