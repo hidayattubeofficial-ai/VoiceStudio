@@ -24,7 +24,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          rm -rf /tmp/voicestudio-src
+          rm -rf /tmp/voicestudio-src /tmp/target /tmp/source-workflows
           git clone --depth 1 --branch v0.5.6 https://github.com/debpalash/VoiceStudio.git /tmp/voicestudio-src
           cd /tmp/voicestudio-src
 
@@ -32,8 +32,11 @@ jobs:
           ACTUAL_COMMIT="$(git rev-parse HEAD)"
           test "$ACTUAL_COMMIT" = "$EXPECTED_COMMIT"
 
+          mkdir -p /tmp/source-workflows
+          cp -a .github/workflows/. /tmp/source-workflows/
+          rm -rf .github/workflows
           rm -rf .git
-          rm -rf /tmp/target
+
           mkdir -p /tmp/target
           cp -a . /tmp/target/
 
@@ -45,6 +48,7 @@ jobs:
           cp -a /tmp/target/. .
           cp /tmp/voicestudio-v056-file-sha256.txt VOICESTUDIO_V0.5.6_FILE_SHA256.txt
           printf '%s\n' "VoiceStudio v0.5.6 official source commit: $ACTUAL_COMMIT" > VOICESTUDIO_V0.5.6_IMPORT_VERIFIED.txt
+          printf '%s\n' "Source workflow files staged separately because workflow writes require Workflows permission." > VOICESTUDIO_V0.5.6_WORKFLOW_IMPORT_NOTE.txt
 
           git add -A
           git commit -m "Import official VoiceStudio v0.5.6 source"
