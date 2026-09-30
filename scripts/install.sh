@@ -167,6 +167,7 @@ install_app() {
 }
 
 if [ "$MODE" = main ]; then
+    SOURCE_VERSION_FILE="$WORK/source-version"
     for tool in git node bun cargo; do have "$tool" || die "Main builds require $tool; see the source-build prerequisites in README."; done
     node -e 'if (Number(process.versions.node.split(".")[0]) < 22) process.exit(1)' || die 'Node.js 22 or newer is required.'
     printf 'Building and installing Electron from main (this may take several minutes).\n'
@@ -192,6 +193,8 @@ if [ "$MODE" = main ]; then
         bun run electron-builder --config electron-builder.config.mjs --publish never --"$OS" --"$ARCH"
         node tests/update-package-contract.mjs
     )
+    VERSION=$(cat "$SOURCE_VERSION_FILE")
+    valid_version "$VERSION" || die 'Invalid version captured from source checkout.'
     PACKAGE_DIR="$WORK/source/electron/release"
 else
     RELEASES=https://github.com/debpalash/VoiceStudio/releases
