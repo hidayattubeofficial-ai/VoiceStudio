@@ -1,0 +1,1 @@
+VoiceStudio v0.5.6 official source commit: 3915a62cb482bb43117aaebab57d22745bd1cc21
