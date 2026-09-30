@@ -175,6 +175,7 @@ if [ "$MODE" = main ]; then
     cd "$WORK/source"
         printf 'Source commit: '; git rev-parse HEAD
         bun install --frozen-lockfile
+        # Keep source version in the parent shell so packaging cannot erase it.
         # Capture the app version before the Electron packaging step. Some build
         # tooling may clean or rewrite source-side files after reading them.
         SOURCE_VERSION=$(node -p 'require(process.argv[1]).version' "$WORK/source/frontend/package.json")
