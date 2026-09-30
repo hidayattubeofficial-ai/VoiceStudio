@@ -167,6 +167,7 @@ install_app() {
 }
 
 if [ "$MODE" = main ]; then
+    SOURCE_VERSION_FILE="$WORK/source-version"
     for tool in git node bun cargo; do have "$tool" || die "Main builds require $tool; see the source-build prerequisites in README."; done
     node -e 'if (Number(process.versions.node.split(".")[0]) < 22) process.exit(1)' || die 'Node.js 22 or newer is required.'
     printf 'Building and installing Electron from main (this may take several minutes).\n'
@@ -176,6 +177,11 @@ if [ "$MODE" = main ]; then
         cd "$WORK/source"
         printf 'Source commit: '; git rev-parse HEAD
         bun install --frozen-lockfile
+        # Capture the app version before the Electron packaging step. Some build
+        # tooling may clean or rewrite source-side files after reading them.
+        SOURCE_VERSION=$(node -p 'require(process.argv[1]).version' "$WORK/source/frontend/package.json")
+        valid_version "$SOURCE_VERSION" || die 'Invalid version in source checkout.'
+        printf 'Source app version: %s\\n' "$SOURCE_VERSION"
         # Packaging includes the backend and builds its Rust native helper.
         # Backend setup is performed by the installed app on first launch.
         export CSC_IDENTITY_AUTO_DISCOVERY=false
@@ -187,8 +193,8 @@ if [ "$MODE" = main ]; then
         bun run electron-builder --config electron-builder.config.mjs --publish never --"$OS" --"$ARCH"
         node tests/update-package-contract.mjs
     )
-    VERSION=$(node -p 'require(process.argv[1]).version' "$WORK/source/frontend/package.json")
-    valid_version "$VERSION" || die 'Invalid version in source checkout.'
+    VERSION=$(cat "$SOURCE_VERSION_FILE")
+    valid_version "$VERSION" || die 'Invalid version captured from source checkout.'
     PACKAGE_DIR="$WORK/source/electron/release"
 else
     RELEASES=https://github.com/debpalash/VoiceStudio/releases

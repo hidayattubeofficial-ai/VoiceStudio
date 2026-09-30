@@ -34,7 +34,7 @@ def test_the_ghcr_path_does_not_follow_the_repository_name():
         "would silently move published images and strand everyone pulling the "
         "documented path"
     )
-    assert image == "debpalash/omnivoice-studio"
+    assert image == "hidayattubeofficial-ai/voicestudio"
 
 
 def test_the_two_registries_publish_the_same_name():
