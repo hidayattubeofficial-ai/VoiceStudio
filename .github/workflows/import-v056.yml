@@ -1,0 +1,77 @@
+name: Import VoiceStudio v0.5.6
+
+on:
+  push:
+    branches: [import/v0.5.6]
+
+permissions:
+  contents: write
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout target branch
+        uses: actions/checkout@v4
+        with:
+          ref: import/v0.5.6
+          fetch-depth: 1
+
+      - name: Import official v0.5.6 source
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          rm -rf /tmp/voicestudio-src /tmp/target /tmp/source-workflows
+          git clone --depth 1 --branch v0.5.6 https://github.com/debpalash/VoiceStudio.git /tmp/voicestudio-src
+          cd /tmp/voicestudio-src
+
+          EXPECTED_COMMIT="3915a62cb482bb43117aaebab57d22745bd1cc21"
+          ACTUAL_COMMIT="$(git rev-parse HEAD)"
+          test "$ACTUAL_COMMIT" = "$EXPECTED_COMMIT"
+
+          mkdir -p /tmp/source-workflows
+          cp -a .github/workflows/. /tmp/source-workflows/
+          rm -rf .github/workflows
+          rm -rf .git
+
+          mkdir -p /tmp/target
+          cp -a . /tmp/target/
+
+          # Restore tracked binary assets that are not materialized by the shallow clone.
+          mkdir -p /tmp/target/backend/assets/samples/demo/dubbing /tmp/target/electron/build
+          for spec in \
+            "backend/assets/samples/demo/dubbing/dubbed_es.src.wav 7122a09402c55ce02fe99f2534592d801ace3938" \
+            "backend/assets/samples/demo/dubbing/dubbed_fr.src.wav 2736f8ff665748e0eab95c09ace9d3613aa3b3f4" \
+            "backend/assets/samples/demo/dubbing/dubbed_ja.src.wav 57d6dd3a503bfce2ad6b0d1967b012e24a17debd" \
+            "backend/assets/samples/demo/dubbing/dubbed_zh.src.wav ef53f7c12abd210e2a5b085315bca07ab8a65a76" \
+            "backend/assets/samples/demo/dubbing/source.src.wav d5c103b86fbe719c4ee1ac824f98782a9170bf38" \
+            "electron/build/entitlements.mac.plist 281212ccaff227d9c74b32573ec6afb86dd2a4a0"; do
+            path="${spec% *}"
+            expected="${spec##* }"
+            curl -L --fail --retry 3 -o "/tmp/target/$path" "https://raw.githubusercontent.com/debpalash/VoiceStudio/$EXPECTED_COMMIT/$path"
+            actual="$(git hash-object "/tmp/target/$path")"
+            test "$actual" = "$expected"
+          done
+
+          cd /tmp/target
+          find . -type f -print0 | sort -z | xargs -0 sha256sum > /tmp/voicestudio-v056-file-sha256.txt
+
+          cd "$GITHUB_WORKSPACE"
+          find . -mindepth 1 -maxdepth 1 ! -name .git ! -name .github -exec rm -rf {} +
+          cp -a /tmp/target/. .
+
+          # Preserve the official submodule gitlink exactly as released.
+          git update-index --add --cacheinfo 160000,22e8e6da806fb1904a75db99adb1759832b6ebd0,omnivoice-gallery
+
+          cp /tmp/voicestudio-v056-file-sha256.txt VOICESTUDIO_V0.5.6_FILE_SHA256.txt
+          printf '%s\n' "VoiceStudio v0.5.6 official source commit: $ACTUAL_COMMIT" > VOICESTUDIO_V0.5.6_IMPORT_VERIFIED.txt
+          printf '%s\n' "Source workflow files staged separately because workflow writes require Workflows permission." > VOICESTUDIO_V0.5.6_WORKFLOW_IMPORT_NOTE.txt
+
+          git add -A
+          # These tracked upstream files match .gitignore patterns; force-add them.
+          git add -f backend/assets/samples/demo/dubbing/*.src.wav electron/build/entitlements.mac.plist
+          git commit -m "Import official VoiceStudio v0.5.6 source"
+          git push origin HEAD:import/v0.5.6
