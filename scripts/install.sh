@@ -178,9 +178,9 @@ if [ "$MODE" = main ]; then
         bun install --frozen-lockfile
         # Capture the app version before the Electron packaging step. Some build
         # tooling may clean or rewrite source-side files after reading them.
-        VERSION=$(node -p 'require(process.argv[1]).version' "$WORK/source/frontend/package.json")
-        valid_version "$VERSION" || die 'Invalid version in source checkout.'
-        printf 'Source app version: %s\\n' "$VERSION"
+        SOURCE_VERSION=$(node -p 'require(process.argv[1]).version' "$WORK/source/frontend/package.json")
+        valid_version "$SOURCE_VERSION" || die 'Invalid version in source checkout.'
+        printf 'Source app version: %s\\n' "$SOURCE_VERSION"
         # Packaging includes the backend and builds its Rust native helper.
         # Backend setup is performed by the installed app on first launch.
         export CSC_IDENTITY_AUTO_DISCOVERY=false
