@@ -167,14 +167,12 @@ install_app() {
 }
 
 if [ "$MODE" = main ]; then
-    SOURCE_VERSION_FILE="$WORK/source-version"
     for tool in git node bun cargo; do have "$tool" || die "Main builds require $tool; see the source-build prerequisites in README."; done
     node -e 'if (Number(process.versions.node.split(".")[0]) < 22) process.exit(1)' || die 'Node.js 22 or newer is required.'
     printf 'Building and installing Electron from main (this may take several minutes).\n'
     # Never pull into, reset, or build from an existing user checkout.
     git clone --depth 1 --branch main --single-branch https://github.com/debpalash/VoiceStudio.git "$WORK/source"
-    (
-        cd "$WORK/source"
+    cd "$WORK/source"
         printf 'Source commit: '; git rev-parse HEAD
         bun install --frozen-lockfile
         # Capture the app version before the Electron packaging step. Some build
@@ -192,8 +190,8 @@ if [ "$MODE" = main ]; then
         # in a chained package script, not necessarily to electron-builder.
         bun run electron-builder --config electron-builder.config.mjs --publish never --"$OS" --"$ARCH"
         node tests/update-package-contract.mjs
-    )
-    VERSION=$(cat "$SOURCE_VERSION_FILE")
+    cd "$WORK"
+    VERSION="$SOURCE_VERSION"
     valid_version "$VERSION" || die 'Invalid version captured from source checkout.'
     PACKAGE_DIR="$WORK/source/electron/release"
 else
