@@ -44,7 +44,7 @@ jobs:
           mkdir -p /tmp/target/backend/assets/samples/demo/dubbing /tmp/target/electron/build
           for spec in \
             "backend/assets/samples/demo/dubbing/dubbed_es.src.wav 7122a09402c55ce02fe99f2534592d801ace3938" \
-            "backend/assets/samples/demo/dubbing/dubbed_fr.src.wav 2736f8ff665748e0ab95c09ace9d3613aa3b3f4" \
+            "backend/assets/samples/demo/dubbing/dubbed_fr.src.wav 2736f8ff665748e0eab95c09ace9d3613aa3b3f4" \
             "backend/assets/samples/demo/dubbing/dubbed_ja.src.wav 57d6dd3a503bfce2ad6b0d1967b012e24a17debd" \
             "backend/assets/samples/demo/dubbing/dubbed_zh.src.wav ef53f7c12abd210e2a5b085315bca07ab8a65a76" \
             "backend/assets/samples/demo/dubbing/source.src.wav d5c103b86fbe719c4ee1ac824f98782a9170bf38" \
