@@ -1,0 +1,3 @@
+[submodule "upstream/VoiceStudio"]
+	path = upstream/VoiceStudio
+	url = https://github.com/debpalash/VoiceStudio.git
