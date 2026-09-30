@@ -40,12 +40,32 @@ jobs:
           mkdir -p /tmp/target
           cp -a . /tmp/target/
 
+          # Restore tracked binary assets that are not materialized by the shallow clone.
+          mkdir -p /tmp/target/backend/assets/samples/demo/dubbing /tmp/target/electron/build
+          for spec in \
+            "backend/assets/samples/demo/dubbing/dubbed_es.src.wav 7122a09402c55ce02fe99f2534592d801ace3938" \
+            "backend/assets/samples/demo/dubbing/dubbed_fr.src.wav 2736f8ff665748e0ab95c09ace9d3613aa3b3f4" \
+            "backend/assets/samples/demo/dubbing/dubbed_ja.src.wav 57d6dd3a503bfce2ad6b0d1967b012e24a17debd" \
+            "backend/assets/samples/demo/dubbing/dubbed_zh.src.wav ef53f7c12abd210e2a5b085315bca07ab8a65a76" \
+            "backend/assets/samples/demo/dubbing/source.src.wav d5c103b86fbe719c4ee1ac824f98782a9170bf38" \
+            "electron/build/entitlements.mac.plist 281212ccaff227d9c74b32573ec6afb86dd2a4a0"; do
+            path="${spec% *}"
+            expected="${spec##* }"
+            curl -L --fail --retry 3 -o "/tmp/target/$path" "https://raw.githubusercontent.com/debpalash/VoiceStudio/$EXPECTED_COMMIT/$path"
+            actual="$(git hash-object "/tmp/target/$path")"
+            test "$actual" = "$expected"
+          done
+
           cd /tmp/target
           find . -type f -print0 | sort -z | xargs -0 sha256sum > /tmp/voicestudio-v056-file-sha256.txt
 
           cd "$GITHUB_WORKSPACE"
           find . -mindepth 1 -maxdepth 1 ! -name .git ! -name .github -exec rm -rf {} +
           cp -a /tmp/target/. .
+
+          # Preserve the official submodule gitlink exactly as released.
+          git update-index --add --cacheinfo 160000,22e8e6da806fb1904a75db99adb1759832b6ebd0,omnivoice-gallery
+
           cp /tmp/voicestudio-v056-file-sha256.txt VOICESTUDIO_V0.5.6_FILE_SHA256.txt
           printf '%s\n' "VoiceStudio v0.5.6 official source commit: $ACTUAL_COMMIT" > VOICESTUDIO_V0.5.6_IMPORT_VERIFIED.txt
           printf '%s\n' "Source workflow files staged separately because workflow writes require Workflows permission." > VOICESTUDIO_V0.5.6_WORKFLOW_IMPORT_NOTE.txt
