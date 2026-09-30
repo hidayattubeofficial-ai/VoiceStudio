@@ -176,6 +176,11 @@ if [ "$MODE" = main ]; then
         cd "$WORK/source"
         printf 'Source commit: '; git rev-parse HEAD
         bun install --frozen-lockfile
+        # Capture the app version before the Electron packaging step. Some build
+        # tooling may clean or rewrite source-side files after reading them.
+        VERSION=$(node -p 'require(process.argv[1]).version' "$WORK/source/frontend/package.json")
+        valid_version "$VERSION" || die 'Invalid version in source checkout.'
+        printf 'Source app version: %s\\n' "$VERSION"
         # Packaging includes the backend and builds its Rust native helper.
         # Backend setup is performed by the installed app on first launch.
         export CSC_IDENTITY_AUTO_DISCOVERY=false
@@ -187,8 +192,6 @@ if [ "$MODE" = main ]; then
         bun run electron-builder --config electron-builder.config.mjs --publish never --"$OS" --"$ARCH"
         node tests/update-package-contract.mjs
     )
-    VERSION=$(node -p 'require(process.argv[1]).version' "$WORK/source/frontend/package.json")
-    valid_version "$VERSION" || die 'Invalid version in source checkout.'
     PACKAGE_DIR="$WORK/source/electron/release"
 else
     RELEASES=https://github.com/debpalash/VoiceStudio/releases
