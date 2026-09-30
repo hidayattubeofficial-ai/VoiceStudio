@@ -71,5 +71,7 @@ jobs:
           printf '%s\n' "Source workflow files staged separately because workflow writes require Workflows permission." > VOICESTUDIO_V0.5.6_WORKFLOW_IMPORT_NOTE.txt
 
           git add -A
+          # These tracked upstream files match .gitignore patterns; force-add them.
+          git add -f backend/assets/samples/demo/dubbing/*.src.wav electron/build/entitlements.mac.plist
           git commit -m "Import official VoiceStudio v0.5.6 source"
           git push origin HEAD:import/v0.5.6
