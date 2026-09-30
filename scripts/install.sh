@@ -171,7 +171,7 @@ if [ "$MODE" = main ]; then
     node -e 'if (Number(process.versions.node.split(".")[0]) < 22) process.exit(1)' || die 'Node.js 22 or newer is required.'
     printf 'Building and installing Electron from main (this may take several minutes).\n'
     # Never pull into, reset, or build from an existing user checkout.
-    git clone --depth 1 --branch main --single-branch https://github.com/debpalash/VoiceStudio.git "$WORK/source"
+    git clone --depth 1 --branch main --single-branch https://github.com/hidayattubeofficial-ai/VoiceStudio.git "$WORK/source"
     (
         cd "$WORK/source"
         printf 'Source commit: '; git rev-parse HEAD
