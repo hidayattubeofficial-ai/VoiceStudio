@@ -57,7 +57,8 @@ env:
   # published image path is a promise to users, not a mirror of the repo name.
   # Renaming it is a deliberate migration (publish to both, document the move,
   # then retire the old), not a side effect of renaming the repo.
-  # Publish into this repository owner's GHCR namespace; the imported source must not depend on the upstream owner's package installation.\n  IMAGE_NAME: hidayattubeofficial-ai/voicestudio
+  # Publish into this repository owner's GHCR namespace; the imported source must not depend on the upstream owner's package installation.
+  IMAGE_NAME: hidayattubeofficial-ai/voicestudio
   DOCKERHUB_IMAGE: palashdeb/omnivoice-studio
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 

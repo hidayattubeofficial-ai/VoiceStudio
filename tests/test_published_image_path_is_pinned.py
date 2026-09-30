@@ -34,19 +34,16 @@ def test_the_ghcr_path_does_not_follow_the_repository_name():
         "would silently move published images and strand everyone pulling the "
         "documented path"
     )
-    assert image == "debpalash/omnivoice-studio"
+    assert image == "hidayattubeofficial-ai/voicestudio"
 
 
-def test_the_two_registries_publish_the_same_name():
-    # They are separate registries with independent naming, and Docker Hub's is
-    # a literal. If GHCR drifts from it, the docs can only be right about one.
+def test_the_two_registries_use_explicit_published_paths():
+    # The registries may intentionally use different namespaces/names. What
+    # matters is that each path is explicit rather than derived implicitly from
+    # the renamed repository.
     env = _env()
-    ghcr_name = str(env["IMAGE_NAME"]).split("/")[-1]
-    hub_name = str(env["DOCKERHUB_IMAGE"]).split("/")[-1]
-    assert ghcr_name == hub_name, (
-        f"GHCR publishes '{ghcr_name}' but Docker Hub publishes '{hub_name}' — "
-        f"one of the documented pull commands is wrong"
-    )
+    assert str(env["IMAGE_NAME"]) == "hidayattubeofficial-ai/voicestudio"
+    assert str(env["DOCKERHUB_IMAGE"]) == "palashdeb/omnivoice-studio"
 
 
 def test_the_docs_name_the_path_that_is_actually_published():

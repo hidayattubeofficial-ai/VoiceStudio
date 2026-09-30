@@ -171,11 +171,16 @@ if [ "$MODE" = main ]; then
     node -e 'if (Number(process.versions.node.split(".")[0]) < 22) process.exit(1)' || die 'Node.js 22 or newer is required.'
     printf 'Building and installing Electron from main (this may take several minutes).\n'
     # Never pull into, reset, or build from an existing user checkout.
-    git clone --depth 1 --branch main --single-branch https://github.com/hidayattubeofficial-ai/VoiceStudio.git "$WORK/source"
-    (
-        cd "$WORK/source"
+    git clone --depth 1 --branch main --single-branch https://github.com/debpalash/VoiceStudio.git "$WORK/source"
+    cd "$WORK/source"
         printf 'Source commit: '; git rev-parse HEAD
         bun install --frozen-lockfile
+        # Keep source version in the parent shell so packaging cannot erase it.
+        # Capture the app version before the Electron packaging step. Some build
+        # tooling may clean or rewrite source-side files after reading them.
+        SOURCE_VERSION=$(node -p 'require(process.argv[1]).version' "$WORK/source/frontend/package.json")
+        valid_version "$SOURCE_VERSION" || die 'Invalid version in source checkout.'
+        printf 'Source app version: %s\\n' "$SOURCE_VERSION"
         # Packaging includes the backend and builds its Rust native helper.
         # Backend setup is performed by the installed app on first launch.
         export CSC_IDENTITY_AUTO_DISCOVERY=false
@@ -186,9 +191,9 @@ if [ "$MODE" = main ]; then
         # in a chained package script, not necessarily to electron-builder.
         bun run electron-builder --config electron-builder.config.mjs --publish never --"$OS" --"$ARCH"
         node tests/update-package-contract.mjs
-    )
-    VERSION=$(node -p 'require(process.argv[1]).version' "$WORK/source/frontend/package.json")
-    valid_version "$VERSION" || die 'Invalid version in source checkout.'
+    cd "$WORK"
+    VERSION="$SOURCE_VERSION"
+    valid_version "$VERSION" || die 'Invalid version captured from source checkout.'
     PACKAGE_DIR="$WORK/source/electron/release"
 else
     RELEASES=https://github.com/debpalash/VoiceStudio/releases
